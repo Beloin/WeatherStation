@@ -4,6 +4,8 @@
         "ssd1306.h": "c",
         "stdio.h": "c",
         "debug.h": "c",
-        "esp_log.h": "c"
+        "esp_log.h": "c",
+        "font8x8_basic.h": "c",
+        "sdkconfig.h": "c"
     }
 }
