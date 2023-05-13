@@ -83,17 +83,24 @@ static portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 #define PORT_ENTER_CRITICAL() portENTER_CRITICAL(&mux)
 #define PORT_EXIT_CRITICAL() portEXIT_CRITICAL(&mux)
 
-#define CHECK_ARG(VAL) do { if (!(VAL)) return ESP_ERR_INVALID_ARG; } while (0)
-
-#define CHECK_LOGE(x, msg, ...) do { \
-        esp_err_t __; \
-        if ((__ = x) != ESP_OK) { \
-            PORT_EXIT_CRITICAL(); \
-            ESP_LOGE(TAG, msg, ## __VA_ARGS__); \
-            return __; \
-        } \
+#define CHECK_ARG(VAL)                  \
+    do                                  \
+    {                                   \
+        if (!(VAL))                     \
+            return ESP_ERR_INVALID_ARG; \
     } while (0)
 
+#define CHECK_LOGE(x, msg, ...)                \
+    do                                         \
+    {                                          \
+        esp_err_t __;                          \
+        if ((__ = x) != ESP_OK)                \
+        {                                      \
+            PORT_EXIT_CRITICAL();              \
+            ESP_LOGE(TAG, msg, ##__VA_ARGS__); \
+            return __;                         \
+        }                                      \
+    } while (0)
 
 /**
  * Wait specified time for pin to go to a specified state.
@@ -102,7 +109,7 @@ static portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
  * The elapsed time is returned in pointer 'duration' if it is not NULL.
  */
 static esp_err_t dht_await_pin_state(gpio_num_t pin, uint32_t timeout,
-       int expected_pin_state, uint32_t *duration)
+                                     int expected_pin_state, uint32_t *duration)
 {
     /* XXX dht_await_pin_state() should save pin direction and restore
      * the direction before return. however, the SDK does not provide
@@ -142,21 +149,21 @@ static inline esp_err_t dht_fetch_data(dht_sensor_type_t sensor_type, gpio_num_t
 
     // Step through Phase 'B', 40us
     CHECK_LOGE(dht_await_pin_state(pin, 40, 0, NULL),
-            "Initialization error, problem in phase 'B'");
+               "Initialization error, problem in phase 'B'");
     // Step through Phase 'C', 88us
     CHECK_LOGE(dht_await_pin_state(pin, 88, 1, NULL),
-            "Initialization error, problem in phase 'C'");
+               "Initialization error, problem in phase 'C'");
     // Step through Phase 'D', 88us
     CHECK_LOGE(dht_await_pin_state(pin, 88, 0, NULL),
-            "Initialization error, problem in phase 'D'");
+               "Initialization error, problem in phase 'D'");
 
     // Read in each of the 40 bits of data...
     for (int i = 0; i < DHT_DATA_BITS; i++)
     {
         CHECK_LOGE(dht_await_pin_state(pin, 65, 1, &low_duration),
-                "LOW bit timeout");
+                   "LOW bit timeout");
         CHECK_LOGE(dht_await_pin_state(pin, 75, 0, &high_duration),
-                "HIGH bit timeout");
+                   "HIGH bit timeout");
 
         uint8_t b = i / 8;
         uint8_t m = i % 8;
@@ -186,18 +193,18 @@ static inline int16_t dht_convert_data(dht_sensor_type_t sensor_type, uint8_t ms
         data <<= 8;
         data |= lsb;
         if (msb & BIT(7))
-            data = -data;       // convert it to negative
+            data = -data; // convert it to negative
     }
 
     return data;
 }
 
 esp_err_t dht_read_data(dht_sensor_type_t sensor_type, gpio_num_t pin,
-        int16_t *humidity, int16_t *temperature)
+                        int16_t *humidity, int16_t *temperature)
 {
     CHECK_ARG(humidity || temperature);
 
-    uint8_t data[DHT_DATA_BYTES] = { 0 };
+    uint8_t data[DHT_DATA_BYTES] = {0};
 
     gpio_set_direction(pin, GPIO_MODE_OUTPUT_OD);
     gpio_set_level(pin, 1);
@@ -232,7 +239,7 @@ esp_err_t dht_read_data(dht_sensor_type_t sensor_type, gpio_num_t pin,
 }
 
 esp_err_t dht_read_float_data(dht_sensor_type_t sensor_type, gpio_num_t pin,
-        float *humidity, float *temperature)
+                              float *humidity, float *temperature)
 {
     CHECK_ARG(humidity || temperature);
 
