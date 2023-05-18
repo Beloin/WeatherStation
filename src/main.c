@@ -33,113 +33,115 @@
 #define CONFIG_SSD1306_128x32 1
 #define CONFIG_SSD1306_128x64 0
 
-#define DEBOUNCE_TIME_MS 50
+#define DEBOUNCE_TIME_MS 250
 #define BUTTON_TIME_MS 1000
 
-TaskHandle_t buttonTaskHandler = NULL;
-
-uint8_t lastButtonState = 0;
-
-uint8_t buttonState = 0;
-uint8_t schrodingerButtonState = 0;
-uint8_t stableMs = 0;
-
-uint8_t buttonPressed = 0;
-uint8_t buttonReleased = 0;
-
-// TODO: Later implement via interrupt
-void checkButton()
+typedef struct
 {
-    TickType_t current_tick;
-    schrodingerButtonState = gpio_get_level(BUTTON_GPIO);
+    void (*on_pressed)();
+} Button;
 
-    if (buttonState == schrodingerButtonState)
+uint8_t flag_up = 0;
+
+Button button;
+
+void IRAM_ATTR up_interrupt(void *args)
+{
+    flag_up = 1;
+}
+
+void configure_irs()
+{
+    gpio_install_isr_service(0);
+
+    gpio_set_intr_type(BUTTON_GPIO, GPIO_INTR_POSEDGE);
+    gpio_set_direction(BUTTON_GPIO, GPIO_MODE_INPUT);
+
+    gpio_intr_enable(BUTTON_GPIO);
+    gpio_isr_handler_add(BUTTON_GPIO, up_interrupt, NULL);
+}
+
+TickType_t timer, currentTime, since;
+void poll_button(Button *button)
+{
+    if (flag_up == 1)
     {
-        current_tick = xTaskGetTickCount();
-        stableMs += current_tick;
+
+        currentTime = xTaskGetTickCount();
+        since = currentTime - timer;
+
+        if (since > (DEBOUNCE_TIME_MS / portTICK_PERIOD_MS))
+        {
+            button->on_pressed();
+
+            timer = xTaskGetTickCount();
+            flag_up = 0;
+        }
     }
     else
     {
-        buttonState = schrodingerButtonState;
-        stableMs = 0;
+        timer = xTaskGetTickCount();
     }
+}
 
-    if (stableMs >= DEBOUNCE_TIME_MS)
+uint8_t current_representation = 1; // 1 = °C | 2 = °F | 4 = K
+void on_pressed()
+{
+    printf("Button Pressed 🔘 \n");
+
+    current_representation = (current_representation << 1);
+
+    if (current_representation > 4)
     {
-        if (buttonState)
-        {
-            buttonPressed = 1;
-            buttonReleased = 0;
-        }
-        else
-        {
-            if (lastButtonState)
-            {
-                buttonPressed = 0;
-                buttonReleased = 1;
-            }
-            else
-            {
-                buttonPressed = 0;
-            }
-        }
-
-        lastButtonState = buttonState;
-        stableMs = 0;
+        current_representation = 1;
     }
 }
 
-uint8_t isPressed()
-{
-    uint8_t isPressed = buttonPressed;
-    buttonPressed = 0;
-    return isPressed;
-}
-
-uint8_t isReleased()
-{
-    uint8_t isReleased = buttonReleased;
-    buttonReleased = 0;
-    return isReleased;
-}
-
-void ButtonTask(void *arg)
+char dh11value[25];
+int dh11_count;
+TaskHandle_t dht11_task;
+void read_dht_task(void *arg)
 {
     while (1)
     {
-        checkButton();
+        int16_t humidity = 0, temperature = 0;
+        char representation = 0;
+        dht_read_data(DHT_TYPE_DHT11, SENSOR_GPIO, &humidity, &temperature);
 
-        if (isPressed())
+        float float_temp = (float)temperature / 10.f;
+        float humidity_percentage = (float)humidity / 10.f;
+        switch (current_representation)
         {
-            printf("Button Pressed");
+        case 1:
+            representation = 'C';
+            break;
+        case 2:
+            representation = 'F';
+            float_temp = (float_temp * 1.8) + 32; // °F = (°C * 9/5) + 32
+            break;
+        case 4:
+            representation = 'K';
+            float_temp += 273.15; // °K = °C + 273.15
+            break;
+        default:
+            representation = 'C';
+            break;
         }
 
-        if (isReleased())
-        {
-            printf("Button Released");
-        }
+        dh11_count = sprintf(dh11value, "%.1f%c | %.1f%c\n", float_temp, representation, humidity_percentage, 0x25); // U+0025
+
+        vTaskDelay(500 / portTICK_PERIOD_MS);
     }
 }
 
 void app_main()
 {
     debug("Starting Application\n");
-
-    gpio_config_t button_config = {.mode = GPIO_MODE_INPUT, .intr_type = GPIO_INTR_DISABLE};
-    gpio_config(&button_config);
-    gpio_set_level(BUTTON_GPIO, 0);
-    gpio_set_direction(BUTTON_GPIO, GPIO_MODE_INPUT);
-
-    // gpio_pulldown_en(BUTTON_GPIO); // How to enable via softwre?
-
-    int16_t humidity = 0, temperature = 0;
-    char dh11value[100];
+    configure_irs();
 
     SSD1306_t dev;
     i2c_master_init(&dev, SDA_GPIO, SCL_GPIO, RESET_GPIO);
     dev._flip = true;
-
-    ssd1306_clear_screen(&dev, false);
 
 #if CONFIG_SSD1306_128x64
     ssd1306_init(&dev, 128, 64);
@@ -149,20 +151,16 @@ void app_main()
     ssd1306_init(&dev, 128, 32);
 #endif // CONFIG_SSD1306_128x32
 
-    vTaskDelay(3000 / portTICK_PERIOD_MS);
+    ssd1306_clear_screen(&dev, false);
+    xTaskCreate(read_dht_task, "dht11task", 4096, NULL, 5, &dht11_task);
 
-    xTaskCreate(ButtonTask, "ButtonTask", 4096, NULL, 10, &buttonTaskHandler);
-
-    int string_count;
+    button.on_pressed = on_pressed;
     while (1)
     {
-        dht_read_data(DHT_TYPE_DHT11, SENSOR_GPIO, &humidity, &temperature);
-        string_count = sprintf(dh11value, "%.1fC | %.1f%c\n", (float)temperature / 10.f, (float)humidity / 10.f, 0x25); // U+0025
-
-        ssd1306_display_text(&dev, 0, dh11value, string_count, false);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        ssd1306_display_text(&dev, 0, dh11value, dh11_count, false);
+        poll_button(&button);
     }
 
     // Fade Out
-    ssd1306_fadeout(&dev);
+    // ssd1306_fadeout(&dev);
 }
