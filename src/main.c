@@ -85,15 +85,31 @@ void poll_button(Button *button)
 }
 
 uint8_t current_representation = 1; // 1 = °C | 2 = °F | 4 = K
+void update_representation()
+{
+    current_representation = (current_representation << 1);
+    if (current_representation > 4)
+    {
+        current_representation = 1;
+    }
+}
+
+TickType_t last_press = 0;
+uint8_t press_quantity = 0;
 void on_pressed()
 {
     printf("Button Pressed 🔘 \n");
 
-    current_representation = (current_representation << 1);
+    // TODO: How to count multiple clicks? 1..2..3...
+    TickType_t current_tick = xTaskGetTickCount();
 
-    if (current_representation > 4)
+    if (current_tick - last_press < (BUTTON_TIME_MS / portTICK_PERIOD_MS))
     {
-        current_representation = 1;
+        last_press = xTaskGetTickCount();
+    }
+    else
+    {
+        update_representation();
     }
 }
 
@@ -128,7 +144,7 @@ void read_dht_task(void *arg)
             break;
         }
 
-        dh11_count = sprintf(dh11value, "%.1f%c | %.1f%c\n", float_temp, representation, humidity_percentage, 0x25); // U+0025
+        dh11_count = sprintf(dh11value, "%.1f%c%c | %.1f%c\n", float_temp, 0x80, representation, humidity_percentage, 0x25); // U+0025
 
         vTaskDelay(500 / portTICK_PERIOD_MS);
     }
