@@ -12,6 +12,6 @@ typedef struct
 /**
  * This already setup isr interrupt
  */
-void setup_button(Button *button, uint32_t gpio_num, void *(on_pressed)(int));
+void setup_button(Button *button, uint32_t gpio_num, void (on_pressed)(int));
 
 void poll_button(Button *button);

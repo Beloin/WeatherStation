@@ -14,6 +14,8 @@
 #include <dht.h>
 #include <stdio.h>
 
+#include <button.h>
+
 // Project:
 
 // Simple Weather Program: Show weather (Temperature and humidity) on OLED.
@@ -36,74 +38,10 @@
 #define DEBOUNCE_TIME_MS 165
 #define BUTTON_TIME_MS 500
 
-typedef struct
-{
-    void (*on_pressed)(int);
-} Button;
+uint8_t application_mode = 0;
 
-uint8_t flag_up = 0;
-
-Button button;
-
-void IRAM_ATTR up_interrupt(void *args)
-{
-    flag_up = 1;
-}
-
-void configure_isr()
-{
-    gpio_install_isr_service(0);
-
-    gpio_set_intr_type(BUTTON_GPIO, GPIO_INTR_POSEDGE);
-    gpio_set_direction(BUTTON_GPIO, GPIO_MODE_INPUT);
-
-    gpio_intr_enable(BUTTON_GPIO);
-    gpio_isr_handler_add(BUTTON_GPIO, up_interrupt, NULL);
-}
-
-uint8_t press_quantity = 0;
-TickType_t timer, current_tick, since, last_press;
-void poll_button(Button *button)
-{
-    current_tick = xTaskGetTickCount();
-
-    if (flag_up == 1)
-    {
-        since = current_tick - timer;
-
-        if (since > (DEBOUNCE_TIME_MS / portTICK_PERIOD_MS))
-        {
-            press_quantity++;
-
-            last_press = xTaskGetTickCount();
-            timer = xTaskGetTickCount();
-            flag_up = 0;
-        }
-    }
-    else
-    {
-        timer = xTaskGetTickCount();
-    }
-
-    if (press_quantity > 0)
-    {
-        if (current_tick - last_press >= (BUTTON_TIME_MS / portTICK_PERIOD_MS))
-        {
-            button->on_pressed(press_quantity);
-            press_quantity = 0;
-        }
-    }
-}
-
-uint8_t current_representation = 1; // 1 = °C | 2 = °F | 4 = K
-void update_representation()
-{
-    current_representation = (current_representation << 1);
-    if (current_representation > 4)
-    {
-        current_representation = 1;
-    }
-}
+void update_representation();
+void on_pressed(int press_qnt);
 
 void on_pressed(int press_qnt)
 {
@@ -116,7 +54,16 @@ void on_pressed(int press_qnt)
 
     if (press_qnt == 2)
     {
-        
+    }
+}
+
+uint8_t current_representation = 1; // 1 = °C | 2 = °F | 4 = K
+void update_representation()
+{
+    current_representation = (current_representation << 1);
+    if (current_representation > 4)
+    {
+        current_representation = 1;
     }
 }
 
@@ -160,7 +107,6 @@ void read_dht_task(void *arg)
 void app_main()
 {
     debug("Starting Application\n");
-    configure_isr();
 
     SSD1306_t dev;
     i2c_master_init(&dev, SDA_GPIO, SCL_GPIO, RESET_GPIO);
@@ -174,13 +120,28 @@ void app_main()
     ssd1306_init(&dev, 128, 32);
 #endif // CONFIG_SSD1306_128x32
 
+    Button button;
+    setup_button(&button, BUTTON_GPIO, on_pressed);
+    button.on_pressed = on_pressed;
+
     ssd1306_clear_screen(&dev, false);
     xTaskCreate(read_dht_task, "dht11task", 4096, NULL, 5, &dht11_task);
 
-    button.on_pressed = on_pressed;
     while (1)
     {
-        ssd1306_display_text(&dev, 0, dh11value, dh11_count, false);
+        // Hard-coded State Machine:
+        switch (application_mode)
+        {
+        case 0:
+            ssd1306_display_text(&dev, 0, dh11value, dh11_count, false);
+            break;
+        case 1:
+            // implement animation
+        default:
+            ssd1306_display_text(&dev, 0, dh11value, dh11_count, false);
+            break;
+        }
+
         poll_button(&button);
     }
 

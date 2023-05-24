@@ -8,6 +8,8 @@
         "font8x8_basic.h": "c",
         "sdkconfig.h": "c",
         "gpio.h": "c",
-        "task.h": "c"
+        "task.h": "c",
+        "button.h": "c",
+        "esp_err.h": "c"
     }
 }

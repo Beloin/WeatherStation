@@ -3,7 +3,7 @@
 In this project, we show a simple Weather Application, using ESP32 and OLED.
 
 
-## Circuits about interrupt
+## Documents about interrupt in ESP32
  - https://circuitdigest.com/microcontroller-projects/esp32-timers-and-timer-interrupts
  - https://docs.espressif.com/projects/esp-idf/en/v4.3/esp32/api-reference/peripherals/timer.html#timer-api-timer-initialization
 
