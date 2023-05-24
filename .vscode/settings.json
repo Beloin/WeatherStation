@@ -7,6 +7,7 @@
         "esp_log.h": "c",
         "font8x8_basic.h": "c",
         "sdkconfig.h": "c",
-        "gpio.h": "c"
+        "gpio.h": "c",
+        "task.h": "c"
     }
 }

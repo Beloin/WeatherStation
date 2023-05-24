@@ -33,12 +33,12 @@
 #define CONFIG_SSD1306_128x32 1
 #define CONFIG_SSD1306_128x64 0
 
-#define DEBOUNCE_TIME_MS 250
-#define BUTTON_TIME_MS 1000
+#define DEBOUNCE_TIME_MS 165
+#define BUTTON_TIME_MS 500
 
 typedef struct
 {
-    void (*on_pressed)();
+    void (*on_pressed)(int);
 } Button;
 
 uint8_t flag_up = 0;
@@ -50,7 +50,7 @@ void IRAM_ATTR up_interrupt(void *args)
     flag_up = 1;
 }
 
-void configure_irs()
+void configure_isr()
 {
     gpio_install_isr_service(0);
 
@@ -61,19 +61,21 @@ void configure_irs()
     gpio_isr_handler_add(BUTTON_GPIO, up_interrupt, NULL);
 }
 
-TickType_t timer, currentTime, since;
+uint8_t press_quantity = 0;
+TickType_t timer, current_tick, since, last_press;
 void poll_button(Button *button)
 {
+    current_tick = xTaskGetTickCount();
+
     if (flag_up == 1)
     {
-
-        currentTime = xTaskGetTickCount();
-        since = currentTime - timer;
+        since = current_tick - timer;
 
         if (since > (DEBOUNCE_TIME_MS / portTICK_PERIOD_MS))
         {
-            button->on_pressed();
+            press_quantity++;
 
+            last_press = xTaskGetTickCount();
             timer = xTaskGetTickCount();
             flag_up = 0;
         }
@@ -81,6 +83,15 @@ void poll_button(Button *button)
     else
     {
         timer = xTaskGetTickCount();
+    }
+
+    if (press_quantity > 0)
+    {
+        if (current_tick - last_press >= (BUTTON_TIME_MS / portTICK_PERIOD_MS))
+        {
+            button->on_pressed(press_quantity);
+            press_quantity = 0;
+        }
     }
 }
 
@@ -94,22 +105,18 @@ void update_representation()
     }
 }
 
-TickType_t last_press = 0;
-uint8_t press_quantity = 0;
-void on_pressed()
+void on_pressed(int press_qnt)
 {
-    printf("Button Pressed 🔘 \n");
+    printf("Button Pressed %d Times\n", press_qnt);
 
-    // TODO: How to count multiple clicks? 1..2..3...
-    TickType_t current_tick = xTaskGetTickCount();
-
-    if (current_tick - last_press < (BUTTON_TIME_MS / portTICK_PERIOD_MS))
-    {
-        last_press = xTaskGetTickCount();
-    }
-    else
+    if (press_qnt == 1)
     {
         update_representation();
+    }
+
+    if (press_qnt == 2)
+    {
+        
     }
 }
 
@@ -153,7 +160,7 @@ void read_dht_task(void *arg)
 void app_main()
 {
     debug("Starting Application\n");
-    configure_irs();
+    configure_isr();
 
     SSD1306_t dev;
     i2c_master_init(&dev, SDA_GPIO, SCL_GPIO, RESET_GPIO);
