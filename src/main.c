@@ -39,6 +39,7 @@
 #define BUTTON_TIME_MS 500
 
 uint8_t application_mode = 0;
+SSD1306_t dev;
 
 // TODO: Create animation... How?
 char const ball = 'O';
@@ -48,33 +49,9 @@ uint8_t curr_ball_column = 0;
 TickType_t last_ball_tick;
 char row[16] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}; // 128 Bits per column
 
-// TODO: Make it not overload main thread.
-void ball_animation(SSD1306_t *dev, uint8_t rows)
-{
-    uint8_t i, j;
-
-    ssd1306_clear_screen(dev, false);
-    for (i = 0; i < rows; i++)
-    {
-        for (j = 0; j < 16; j++)
-        {
-            if (j > 0)
-                row[j - 1] = ' ';
-            row[j] = ball;
-
-            ssd1306_display_text(dev, i, row, 16, false);
-            vTaskDelay(220 / portTICK_PERIOD_MS);
-        }
-        row[j - 1] = ' ';
-
-        ssd1306_clear_line(dev, i, false);
-    }
-    ssd1306_clear_screen(dev, false);
-}
-
 void tick_ball_animation(SSD1306_t *dev, uint8_t rows, TickType_t current_tick)
 {
-    if (current_tick - last_ball_tick < (200 / portTICK_PERIOD_MS))
+    if (current_tick - last_ball_tick < (300 / portTICK_PERIOD_MS))
     {
         return;
     }
@@ -82,6 +59,7 @@ void tick_ball_animation(SSD1306_t *dev, uint8_t rows, TickType_t current_tick)
     curr_ball_column++;
     if (curr_ball_column >= 16)
     {
+        row[15] = ' ';
         curr_ball_column = 0;
         ssd1306_clear_line(dev, curr_ball_row++, false);
     }
@@ -89,10 +67,6 @@ void tick_ball_animation(SSD1306_t *dev, uint8_t rows, TickType_t current_tick)
     if (curr_ball_row == rows)
     {
         curr_ball_row = 0;
-        // for (uint8_t i = 0; i < 16; i++)
-        // {
-        //     row[i] = ' ';
-        // }
         row[15] = ' ';
     }
 
@@ -124,6 +98,7 @@ void on_pressed(int press_qnt)
 
     if (press_qnt == 2)
     {
+        ssd1306_clear_screen(&dev, false);
         application_mode = application_mode ^ 0x1;
     }
 }
@@ -179,7 +154,6 @@ void app_main()
 {
     debug("Starting Application\n");
 
-    SSD1306_t dev;
     i2c_master_init(&dev, SDA_GPIO, SCL_GPIO, RESET_GPIO);
     dev._flip = true;
 
