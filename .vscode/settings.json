@@ -10,6 +10,9 @@
         "gpio.h": "c",
         "task.h": "c",
         "button.h": "c",
-        "esp_err.h": "c"
+        "esp_err.h": "c",
+        "freertos.h": "c",
+        "ball_animation.h": "c",
+        "i2c.h": "c"
     }
 }

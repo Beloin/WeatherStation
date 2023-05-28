@@ -15,6 +15,8 @@
 #include <stdio.h>
 
 #include <button.h>
+#include <ball_animation.h>
+#include "driver/i2c.h"
 
 // Project:
 
@@ -41,49 +43,12 @@
 uint8_t application_mode = 0;
 SSD1306_t dev;
 
-// TODO: Create animation... How?
-char const ball = 'O';
-
-uint8_t curr_ball_row = 0;
-uint8_t curr_ball_column = 0;
-TickType_t last_ball_tick;
-char row[16] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}; // 128 Bits per column
-
-void tick_ball_animation(SSD1306_t *dev, uint8_t rows, TickType_t current_tick)
-{
-    if (current_tick - last_ball_tick < (300 / portTICK_PERIOD_MS))
-    {
-        return;
-    }
-
-    curr_ball_column++;
-    if (curr_ball_column >= 16)
-    {
-        row[15] = ' ';
-        curr_ball_column = 0;
-        ssd1306_clear_line(dev, curr_ball_row++, false);
-    }
-
-    if (curr_ball_row == rows)
-    {
-        curr_ball_row = 0;
-        row[15] = ' ';
-    }
-
-    if (curr_ball_column > 0)
-    {
-        row[curr_ball_column - 1] = ' ';
-    }
-
-    row[curr_ball_column] = ball;
-    ssd1306_display_text(dev, curr_ball_row, row, 16, false);
-}
-
 // TODO: How to turn off? i2c_master_write_byte(cmd, OLED_CMD_DISPLAY_OFF, true);				// AE
 
 void update_representation();
 void on_pressed(int press_qnt);
 
+uint8_t display_status = 1;
 void on_pressed(int press_qnt)
 {
     printf("Button Pressed %d Times\n", press_qnt);
@@ -98,8 +63,23 @@ void on_pressed(int press_qnt)
 
     if (press_qnt == 2)
     {
+        reset_ball_animation();
         ssd1306_clear_screen(&dev, false);
         application_mode = application_mode ^ 0x1;
+    }
+
+    if (press_qnt == 3)
+    {
+        if (display_status)
+        {
+            ssd1306_turn_off(&dev);
+            display_status = 0;
+        }
+        else
+        {
+            ssd1306_turn_on(&dev);
+            display_status = 1;
+        }
     }
 }
 
@@ -168,11 +148,11 @@ void app_main()
 #endif // CONFIG_SSD1306_128x32
 
     Button button;
-    setup_button(&button, BUTTON_GPIO, on_pressed);
-    button.on_pressed = on_pressed;
 
+    setup_button(&button, BUTTON_GPIO, on_pressed);
     ssd1306_clear_screen(&dev, false);
     xTaskCreate(read_dht_task, "dht11task", 4096, NULL, 5, &dht11_task);
+    ssd1306_display_text(&dev, 0, "jair seacos", 10, false);
 
     while (1)
     {
@@ -183,9 +163,6 @@ void app_main()
             ssd1306_display_text(&dev, 0, dh11value, dh11_count, false);
             break;
         case 1:
-            // TODO: Work as "ticks", so animation will not stop the button click
-            // ball_animation(&dev, rows / 8); // rows / 8 since we will be using pages
-            // application_mode = 0;
             tick_ball_animation(&dev, rows / 8, xTaskGetTickCount());
             break;
         default:

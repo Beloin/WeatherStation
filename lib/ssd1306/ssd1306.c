@@ -30,6 +30,20 @@ void ssd1306_init(SSD1306_t * dev, int width, int height)
 	}
 }
 
+void ssd1306_turn_off(SSD1306_t * dev) 
+{
+	if (dev->_address != SPIAddress) {
+		i2c_turn_off(dev);
+	}
+}
+
+void ssd1306_turn_on(SSD1306_t * dev) 
+{
+	if (dev->_address != SPIAddress) {
+		i2c_turn_on(dev);
+	}
+}
+
 int ssd1306_get_width(SSD1306_t * dev)
 {
 	return dev->_width;

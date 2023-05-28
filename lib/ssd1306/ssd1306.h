@@ -106,6 +106,8 @@ extern "C"
 #endif
 
 void ssd1306_init(SSD1306_t * dev, int width, int height);
+void ssd1306_turn_off(SSD1306_t * dev);
+void ssd1306_turn_on(SSD1306_t * dev);
 int ssd1306_get_width(SSD1306_t * dev);
 int ssd1306_get_height(SSD1306_t * dev);
 int ssd1306_get_pages(SSD1306_t * dev);
@@ -139,6 +141,8 @@ void i2c_init(SSD1306_t * dev, int width, int height);
 void i2c_display_image(SSD1306_t * dev, int page, int seg, uint8_t * images, int width);
 void i2c_contrast(SSD1306_t * dev, int contrast);
 void i2c_hardware_scroll(SSD1306_t * dev, ssd1306_scroll_type_t scroll);
+void i2c_turn_off(SSD1306_t * dev);
+void i2c_turn_on(SSD1306_t * dev);
 
 void spi_master_init(SSD1306_t * dev, int16_t GPIO_MOSI, int16_t GPIO_SCLK, int16_t GPIO_CS, int16_t GPIO_DC, int16_t GPIO_RESET);
 bool spi_master_write_byte(spi_device_handle_t SPIHandle, const uint8_t* Data, size_t DataLength );

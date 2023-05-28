@@ -100,6 +100,32 @@ void i2c_init(SSD1306_t * dev, int width, int height) {
 	i2c_cmd_link_delete(cmd);
 }
 
+void i2c_turn_off(SSD1306_t * dev)
+{
+	i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+	i2c_master_start(cmd);
+	
+	i2c_master_write_byte(cmd, (dev->_address << 1) | I2C_MASTER_WRITE, true);
+	i2c_master_write_byte(cmd, OLED_CONTROL_BYTE_CMD_SINGLE, true);
+	i2c_master_write_byte(cmd, OLED_CMD_DISPLAY_OFF, true);				// AE
+
+	i2c_master_cmd_begin(I2C_NUM, cmd, 10/portTICK_PERIOD_MS);
+	i2c_cmd_link_delete(cmd);
+}
+
+void i2c_turn_on(SSD1306_t * dev)
+{
+	i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+	i2c_master_start(cmd);
+	
+	i2c_master_write_byte(cmd, (dev->_address << 1) | I2C_MASTER_WRITE, true);
+	i2c_master_write_byte(cmd, OLED_CONTROL_BYTE_CMD_SINGLE, true);
+	i2c_master_write_byte(cmd, OLED_CMD_DISPLAY_ON, true);				// AE
+
+	i2c_master_cmd_begin(I2C_NUM, cmd, 10/portTICK_PERIOD_MS);
+	i2c_cmd_link_delete(cmd);
+}
+
 
 void i2c_display_image(SSD1306_t * dev, int page, int seg, uint8_t * images, int width) {
 	i2c_cmd_handle_t cmd;
