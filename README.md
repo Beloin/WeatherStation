@@ -2,6 +2,47 @@
 
 In this project, we show a simple Weather Application, using ESP32 and OLED.
 
+- 1 Button Click: Change temperature representation
+- 2 Button Clicks: Show Simple Animation
+- 3 Button Clicks: Turn monitor off/on
+
+To implement button `on_click` the GPIO_INTR_POSEDGE was used to interrupt on up edge of the click, as wrote in `lib/button/button.c`.
+The animation is a simple ball animation, using "ticks" as a source of control in order to dont't hold the processor for too long.
+
+
+## Circuit Diagram
+
+
+<div class="side">
+    <div class="middle">
+        <p style="text-align: center">Harware Circuit</p>
+        <img src="./docs/circuit2.jpeg" alt="Harware Circuits">
+    </div>
+    <div class="middle">
+        <p style="text-align: center">Schematic Circuit</p>
+        <img src="./docs/kicad.jpeg" alt="Schematic Circuits">
+    </div>
+</div>
+
+<style>
+
+.side {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 20px;
+    place-items: center;
+}
+
+.middle {
+}
+
+.img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+</style>
+
 
 ## Documents about interrupt in ESP32
  - https://circuitdigest.com/microcontroller-projects/esp32-timers-and-timer-interrupts
