@@ -17,7 +17,8 @@ The animation is implemented using "tick". Every call by the main proccess updat
 
 ## Main and Aplication Flow
 
-The main file controls the application flow. We have 2 "Threads": The `main` thread polls button values, ticks the animation and show DHT11 informations in the OLed Scree and the `weather` Thread, runs at every 500ms reading from DHT11 hardware and assign the values to a common variable, so the `main` thread can 
+The main file controls the application flow. We have 2 "Threads": The `main` thread polls button values, ticks the animation and show DHT11 informations in
+the OLed Screen; The `weather` Thread, runs at every 500ms reading from DHT11 hardware and assign the values to a common variable, so the `main` thread can read it and show in the display.
 
 
 ## Circuit Diagram
@@ -26,11 +27,11 @@ The main file controls the application flow. We have 2 "Threads": The `main` thr
 <div class="side">
     <div class="middle">
         <p style="text-align: center">Harware Circuit</p>
-        <img src="./docs/circuit2.jpeg" alt="Harware Circuits">
+        <img class="im-md" src="./docs/circuit2.jpeg" alt="Harware Circuits">
     </div>
     <div class="middle">
         <p style="text-align: center">Schematic Circuit</p>
-        <img src="./docs/kicad.jpeg" alt="Schematic Circuits">
+        <img class="im-md" src="./docs/kicad.jpeg" alt="Schematic Circuits">
     </div>
 </div>
 
@@ -46,7 +47,7 @@ The main file controls the application flow. We have 2 "Threads": The `main` thr
 .middle {
 }
 
-.img {
+.im-md {
     max-width: 100%;
     max-height: 100%;
 }
@@ -55,19 +56,26 @@ The main file controls the application flow. We have 2 "Threads": The `main` thr
 
 ## 1 Click - Change Representation
 
-The Temperature representations is changing between °C, °F and K.
-<img src="./docs/representation.gif" alt="Representation">
+
+<div style="place-items: center; display: grid;">
+    <p style="text-align: center">The Temperature representations is changing between °C, °F and K.</p>
+    <img src="./docs/representation.gif" alt="Representation">
+</div>
 
 
 ## 2 Clicks - Show Animation (Changes application behaviour)
 
-Every 2 Clicks the ball animations is shown.
-<img src="./docs/animation.gif" alt="Representation">
+<div style="place-items: center; display: grid;">
+    <p style="text-align: center">Every 2 Clicks the ball animations is shown.</p>
+    <img src="./docs/animation.gif" alt="Representation">
+</div>
 
 ## 3 Clicks - Turns the OLed display off (Power saver)
 
-On 3 Clicks the screen is turn off to save battery life, turning on again when pressed three times.
-<img src="./docs/shutdown.gif" alt="Representation">
+<div style="place-items: center; display: grid;">
+    <p style="text-align: center">On 3 Clicks the screen is turn off to save battery life, turning on again when pressed three times.</p>
+    <img src="./docs/shutdown.gif" alt="Representation">
+</div>
 
 
 ## Documents about interrupt in ESP32
