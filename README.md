@@ -2,12 +2,22 @@
 
 In this project, we show a simple Weather Application, using ESP32 and OLED.
 
-- 1 Button Click: Change temperature representation
-- 2 Button Clicks: Show Simple Animation
-- 3 Button Clicks: Turn monitor off/on
+1. Button Click: Change temperature representation
+1. Button Clicks: Show Simple Animation
+1. Button Clicks: Turn monitor off/on
 
-To implement button `on_click` the GPIO_INTR_POSEDGE was used to interrupt on up edge of the click, as wrote in `lib/button/button.c`.
-The animation is a simple ball animation, using "ticks" as a source of control in order to dont't hold the processor for too long.
+## Button
+
+To implement button `on_click` the GPIO_INTR_POSEDGE was used to interrupt on up edge of the click, as wrote in `lib/button/button.c`. In the hardware, we have a `Push Button` with 10K pull down resistor (Using 2 20K parallel), so when the button is pressed, the MCU gets a HIGH voltage.
+The `Main` application polls the button to see if the flag was changed in order to debounce it and call the `on_click` function.
+
+## Animation
+
+The animation is implemented using "tick". Every call by the main proccess updates the animation accordingly to the current time. This could be used to update an 2D Physics engine and use sprites to update the display.
+
+## Main and Aplication Flow
+
+The main file controls the application flow. We have 2 "Threads": The `main` thread polls button values, ticks the animation and show DHT11 informations in the OLed Scree and the `weather` Thread, runs at every 500ms reading from DHT11 hardware and assign the values to a common variable, so the `main` thread can 
 
 
 ## Circuit Diagram
@@ -42,6 +52,22 @@ The animation is a simple ball animation, using "ticks" as a source of control i
 }
 
 </style>
+
+## 1 Click - Change Representation
+
+The Temperature representations is changing between °C, °F and K.
+<img src="./docs/representation.gif" alt="Representation">
+
+
+## 2 Clicks - Show Animation (Changes application behaviour)
+
+Every 2 Clicks the ball animations is shown.
+<img src="./docs/animation.gif" alt="Representation">
+
+## 3 Clicks - Turns the OLed display off (Power saver)
+
+On 3 Clicks the screen is turn off to save battery life, turning on again when pressed three times.
+<img src="./docs/shutdown.gif" alt="Representation">
 
 
 ## Documents about interrupt in ESP32

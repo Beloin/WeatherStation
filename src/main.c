@@ -173,6 +173,4 @@ void app_main()
         poll_button(&button);
     }
 
-    // Fade Out
-    // ssd1306_fadeout(&dev);
 }

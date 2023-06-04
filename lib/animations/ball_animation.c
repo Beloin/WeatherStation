@@ -9,6 +9,8 @@ uint8_t curr_ball_column = 0;
 TickType_t last_ball_tick;
 char row[16] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}; // 128 Bits per column
 
+
+// TODO: Separar a animação do hardware de tela
 void tick_ball_animation(SSD1306_t *dev, uint8_t rows, TickType_t current_tick)
 {
     if (current_tick - last_ball_tick < (100 / portTICK_PERIOD_MS))
