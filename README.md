@@ -1,6 +1,6 @@
 # Simple Weather Station
 
-In this project, we show a simple Weather Application, using ESP32 and OLED.
+In this project, we show a simple Weather Application, using ESP32 and OLED. A simple OLed display shows the current temperature and the humidity using the DHT11 sensro and an attached button works as the user interaction of the application.
 
 1. Button Click: Change temperature representation
 1. Button Clicks: Show Simple Animation
