@@ -5,7 +5,7 @@
 
 #include <esp_err.h>
 
-#define DEBOUNCE_TIME_MS 50
+#define DEBOUNCE_TIME_MS 20
 #define BUTTON_TIME_MS 500
 
 void configure_isr(uint32_t gpio_num, Button *button);
@@ -85,7 +85,7 @@ void poll_button(Button *button)
                 button->flag_prev = 0;
 
                 button->press_quantity++;
-                button->last_press_duration = (current_tick - button->last_flag) * portTICK_PERIOD_MS;
+                button->last_press_duration = ((current_tick - button->last_flag) * portTICK_PERIOD_MS) + DEBOUNCE_TIME_MS;
                 button->_last_press = current_tick;
             }
             else
