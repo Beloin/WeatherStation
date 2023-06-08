@@ -46,12 +46,12 @@ SSD1306_t dev;
 // TODO: How to turn off? i2c_master_write_byte(cmd, OLED_CMD_DISPLAY_OFF, true);				// AE
 
 void update_representation();
-void on_pressed(int press_qnt);
+void on_pressed(int press_qnt, int ms);
 
 uint8_t display_status = 1;
-void on_pressed(int press_qnt)
+void on_pressed(int press_qnt, int ms)
 {
-    printf("Button Pressed %d Times\n", press_qnt);
+    printf("Button Pressed %d Times for %dms\n", press_qnt, ms);
 
     if (press_qnt == 1)
     {
@@ -149,7 +149,7 @@ void app_main()
 
     Button button;
 
-    setup_button(&button, BUTTON_GPIO, on_pressed);
+    setup_button(&button, BUTTON_GPIO, on_pressed, 3000);
     ssd1306_clear_screen(&dev, false);
     xTaskCreate(read_dht_task, "dht11task", 4096, NULL, 5, &dht11_task);
     ssd1306_display_text(&dev, 0, "jair seacos", 10, false);
@@ -172,5 +172,4 @@ void app_main()
 
         poll_button(&button);
     }
-
 }
