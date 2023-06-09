@@ -4,7 +4,7 @@ In this project, we show a simple Weather Application, using ESP32 and OLED. A s
 
 1. Button Click: Change temperature representation
 1. Button Clicks: Show Simple Animation
-1. Button Clicks: Turn monitor off/on
+1. Seconds Clicks: Turn monitor off/on
 
 ## Button
 
@@ -70,7 +70,7 @@ the OLed Screen; The `weather` Thread, runs at every 500ms reading from DHT11 ha
     <img src="./docs/animation.gif" alt="Representation">
 </div>
 
-## 3 Clicks - Turns the OLed display off (Power saver)
+## 3 Seconds Click - Turns the OLed display off (Power saver)
 
 <div style="place-items: center; display: grid;">
     <p style="text-align: center">On 3 Clicks the screen is turn off to save battery life, turning on again when pressed three times.</p>
