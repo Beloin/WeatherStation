@@ -53,32 +53,37 @@ void on_pressed(int press_qnt, int ms)
 {
     printf("Button Pressed %d Times for %dms\n", press_qnt, ms);
 
-    if (press_qnt == 1)
+    if (ms < 3000)
     {
-        if (application_mode == 0)
+        if (press_qnt == 1)
         {
-            update_representation();
+            if (application_mode == 0)
+            {
+                update_representation();
+            }
+        }
+
+        if (press_qnt == 2)
+        {
+            reset_ball_animation();
+            ssd1306_clear_screen(&dev, false);
+            application_mode = application_mode ^ 0x1;
         }
     }
-
-    if (press_qnt == 2)
+    else
     {
-        reset_ball_animation();
-        ssd1306_clear_screen(&dev, false);
-        application_mode = application_mode ^ 0x1;
-    }
-
-    if (press_qnt == 3)
-    {
-        if (display_status)
+        if (press_qnt == 1)
         {
-            ssd1306_turn_off(&dev);
-            display_status = 0;
-        }
-        else
-        {
-            ssd1306_turn_on(&dev);
-            display_status = 1;
+            if (display_status)
+            {
+                ssd1306_turn_off(&dev);
+                display_status = 0;
+            }
+            else
+            {
+                ssd1306_turn_on(&dev);
+                display_status = 1;
+            }
         }
     }
 }
