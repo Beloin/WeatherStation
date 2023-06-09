@@ -11,6 +11,7 @@ typedef struct
 
     uint8_t flag_any;
     uint8_t flag_prev;
+    uint8_t _ignore_next;
 
     uint16_t limit_ms;
 

@@ -14,7 +14,11 @@ void send_on_pressed(Button *button);
 void setup_button(Button *button, uint32_t gpio_num, _on_pressed on_pressed, uint16_t limit_ms)
 {
     button->flag_up = 0;
+    button->flag_any = 0;
+    button->flag_prev = 0;
+
     button->press_quantity = 0;
+    button->_ignore_next = 0;
     button->on_pressed = on_pressed;
     button->limit_ms = limit_ms;
 
@@ -84,9 +88,16 @@ void poll_button(Button *button)
             {
                 button->flag_prev = 0;
 
-                button->press_quantity++;
-                button->last_press_duration = ((current_tick - button->last_flag) * portTICK_PERIOD_MS) + DEBOUNCE_TIME_MS;
-                button->_last_press = current_tick;
+                if (button->_ignore_next)
+                {
+                    button->_ignore_next = 0;
+                }
+                else
+                {
+                    button->press_quantity++;
+                    button->last_press_duration = ((current_tick - button->last_flag) * portTICK_PERIOD_MS) + DEBOUNCE_TIME_MS;
+                    button->_last_press = current_tick;
+                }
             }
             else
             {
@@ -98,6 +109,16 @@ void poll_button(Button *button)
     else
     {
         button->_timer = xTaskGetTickCount();
+    }
+
+    if (!button->_ignore_next && button->flag_prev && ((current_tick - button->last_flag) * portTICK_PERIOD_MS) + DEBOUNCE_TIME_MS > 3000)
+    {
+        printf("Reached 3000ms\n");
+        button->_timer = xTaskGetTickCount();
+        button->_ignore_next = 1;
+        button->press_quantity++;
+        button->last_press_duration = ((current_tick - button->last_flag) * portTICK_PERIOD_MS) + DEBOUNCE_TIME_MS;
+        button->_last_press = current_tick;
     }
 
     if (button->press_quantity > 0)
