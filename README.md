@@ -4,7 +4,7 @@ In this project, we show a simple Weather Application, using ESP32 and OLED. A s
 
 1. Button Click: Change temperature representation
 1. Button Clicks: Show Simple Animation
-1. Seconds Clicks: Turn monitor off/on
+1. Seconds Click: Turn monitor off/on
 
 ## Button
 
