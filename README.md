@@ -55,7 +55,7 @@ the OLed Screen; The `weather` Thread, runs at every 500ms reading from DHT11 ha
 
 <div align="center" style="place-items: center; display: grid;">
     <img src="./docs/shutdown.gif" alt="Representation">
-    <p style="text-align: center">On 3 Clicks the screen is turn off to save battery life, turning on again when pressed three times.</p>
+    <p style="text-align: center">On 3 Seconds click the screen is turn off to save battery life, turning on again when pressed for three seconds.</p>
 </div>
 
 
