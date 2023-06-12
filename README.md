@@ -39,23 +39,23 @@ the OLed Screen; The `weather` Thread, runs at every 500ms reading from DHT11 ha
 
 
 <div align="center" style="place-items: center; display: grid;">
-    <p style="text-align: center">The Temperature representations is changing between °C, °F and K.</p>
     <img src="./docs/representation.gif" alt="Representation">
+    <p style="text-align: center">The Temperature representations is changing between °C, °F and K.</p>
 </div>
 
 
 ## 2 Clicks - Show Animation (Changes application behaviour)
 
 <div align="center" style="place-items: center; display: grid;">
-    <p style="text-align: center">Every 2 Clicks the ball animations is shown.</p>
     <img src="./docs/animation.gif" alt="Representation">
+    <p style="text-align: center">Every 2 Clicks the ball animations is shown.</p>
 </div>
 
 ## 3 Seconds Click - Turns the OLed display off (Power saver)
 
 <div align="center" style="place-items: center; display: grid;">
-    <p style="text-align: center">On 3 Clicks the screen is turn off to save battery life, turning on again when pressed three times.</p>
     <img src="./docs/shutdown.gif" alt="Representation">
+    <p style="text-align: center">On 3 Clicks the screen is turn off to save battery life, turning on again when pressed three times.</p>
 </div>
 
 
