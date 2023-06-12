@@ -24,35 +24,16 @@ the OLed Screen; The `weather` Thread, runs at every 500ms reading from DHT11 ha
 ## Circuit Diagram
 
 
-<div class="side">
-    <div class="middle">
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: 20px; place-items: center;">
+    <div>
         <p style="text-align: center">Harware Circuit</p>
-        <img class="im-md" src="./docs/circuit2.jpeg" alt="Harware Circuits">
+        <img style="max-width: 100%; max-height: 100%;" src="./docs/circuit2.jpeg" alt="Harware Circuits">
     </div>
-    <div class="middle">
+    <div>
         <p style="text-align: center">Schematic Circuit</p>
-        <img class="im-md" src="./docs/kicad.jpeg" alt="Schematic Circuits">
+        <img style="max-width: 100%; max-height: 100%;" src="./docs/kicad.jpeg" alt="Schematic Circuits">
     </div>
 </div>
-
-<style>
-
-.side {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    column-gap: 20px;
-    place-items: center;
-}
-
-.middle {
-}
-
-.im-md {
-    max-width: 100%;
-    max-height: 100%;
-}
-
-</style>
 
 ## 1 Click - Change Representation
 
